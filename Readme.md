@@ -19,11 +19,10 @@
 ## 使用方式
 
 1. 將本專案資料夾複製或下載到你的 Windows Sandbox 中。
-2. 對著 `setup.ps1` 點擊 **右鍵** -> 選擇 **Run with PowerShell**。
-   *(或者，打開以系統管理員身分執行的 PowerShell，並執行該檔案 `.\setup.ps1`)*
-3. 等待幾分鐘讓腳本跑完，中途會自動安裝所需軟體。
-4. 腳本結束時，會自動彈出設定頁面與瀏覽器，請依據畫面提示完成最後的步驟：
-   - 設定預設瀏覽器為 Chrome
-   - 下載安裝 AntiGravity
+2. 直接點擊兩下 `start.cmd`。
+   *(它會自動獲取管理員權限，並繞過 PowerShell 的執行限制，去執行 `setup.ps1`)*
+3. 等待幾分鐘讓腳本跑完，中途會自動安裝所需軟體、下載並設定相關環境。
+4. 腳本結束時，請依據畫面提示完成最後的手動步驟：
+   - 如果 AntiGravity 尚未安裝，請至暫存資料夾手動執行。
    - 登入 Notion
-   - 開啟終端機輸入 `gh auth login` 登入 GitHub
+   - 登入 GitHub (打開終端機輸入 `gh auth login`)
