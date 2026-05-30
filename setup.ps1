@@ -43,6 +43,7 @@ if (Test-Path $vscodeSettingsFile) {
 
 $settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
 $settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.enabled' -Value $false -Force
+$settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs' -Value $true -Force
 
 $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
