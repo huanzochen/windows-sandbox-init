@@ -11,7 +11,7 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
 
 # 2. 安裝所有必備軟體 (-y 代表自動同意，不跳提示)
 Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm notion gh antigravity -y
+choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
 
 # 3. Git 設定
 Write-Host "設定 Git..." -ForegroundColor Yellow
@@ -33,10 +33,12 @@ if (-not (Test-Path $vscodeSettingsDir)) {
     New-Item -ItemType Directory -Force -Path $vscodeSettingsDir | Out-Null
 }
 
-if (Test-Path $vscodeSettingsFile -and (Get-Content $vscodeSettingsFile -Raw).Trim() -ne "") {
-    $settings = Get-Content $vscodeSettingsFile -Raw | ConvertFrom-Json
-} else {
-    $settings = New-Object PSObject
+$settings = New-Object PSObject
+if (Test-Path $vscodeSettingsFile) {
+    $content = Get-Content $vscodeSettingsFile -Raw
+    if (-not [string]::IsNullOrWhiteSpace($content)) {
+        $settings = ConvertFrom-Json $content
+    }
 }
 
 $settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
@@ -46,7 +48,8 @@ $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
 # 6. 自動將 Chrome 設為預設瀏覽器
 Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
-Invoke-WebRequest -Uri "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -OutFile "$env:TEMP\SetDefaultBrowser.exe"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -Uri "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -OutFile "$env:TEMP\SetDefaultBrowser.exe" -UseBasicParsing
 & "$env:TEMP\SetDefaultBrowser.exe" HKLM "Google Chrome"
 
 Write-Host "======================================" -ForegroundColor Cyan
