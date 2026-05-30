@@ -7,8 +7,8 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
 }
 
 # 2. 安裝所有必備軟體 (-y 代表自動同意，不跳提示)
-Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm notion gh -y
+Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity..." -ForegroundColor Yellow
+choco install vscode googlechrome git nvm notion gh antigravity -y
 
 # 3. Git 設定
 Write-Host "設定 Git..." -ForegroundColor Yellow
@@ -45,23 +45,8 @@ Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
 Invoke-WebRequest -Uri "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -OutFile "$env:TEMP\SetDefaultBrowser.exe"
 & "$env:TEMP\SetDefaultBrowser.exe" HKLM "Google Chrome"
 
-# 7. 自動下載 AntiGravity
-Write-Host "正在下載 AntiGravity 安裝檔..." -ForegroundColor Yellow
-# 注意：請替換成實際的 .exe 或 .msi 直連下載網址
-$AgUrl = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.10-5119448496078848/windows-x64/Antigravity-x64.exe"
-$AgInstaller = "$env:TEMP\AntiGravity-setup.exe"
-try {
-    Invoke-WebRequest -Uri $AgUrl -OutFile $AgInstaller
-    Write-Host "AntiGravity 下載完成！存放於 $AgInstaller" -ForegroundColor Green
-    # 若確認該安裝檔支援靜默安裝，可以解除下面註解來自動安裝 (以 /S 為例)：
-    # Start-Process -FilePath $AgInstaller -ArgumentList "/S" -Wait -NoNewWindow
-} catch {
-    Write-Host "AntiGravity 下載失敗，請確認載點網址是否正確且可直連下載。" -ForegroundColor Red
-}
-
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
-Write-Host "1. 若上方的 AntiGravity 未自動安裝，請至 $env:TEMP 手動執行 AntiGravity-setup.exe"
-Write-Host "2. 登入 Notion"
-Write-Host "3. 登入 GitHub (打開終端機輸入 gh auth login)"
+Write-Host "1. 登入 Notion"
+Write-Host "2. 登入 GitHub (打開終端機輸入 gh auth login)"
 Write-Host "======================================" -ForegroundColor Cyan
