@@ -1,4 +1,4 @@
-Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
 # 1. 安裝 Chocolatey (套件管理工具)
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
