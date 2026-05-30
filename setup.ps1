@@ -48,9 +48,12 @@ $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
 # 6. 自動將 Chrome 設為預設瀏覽器
 Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -OutFile "$env:TEMP\SetDefaultBrowser.exe" -UseBasicParsing
-& "$env:TEMP\SetDefaultBrowser.exe" HKLM "Google Chrome"
+curl.exe -L "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -o "$env:TEMP\SetDefaultBrowser.exe" --silent
+if (Test-Path "$env:TEMP\SetDefaultBrowser.exe") {
+    & "$env:TEMP\SetDefaultBrowser.exe" HKLM "Google Chrome"
+} else {
+    Write-Host "SetDefaultBrowser.exe 下載失敗！" -ForegroundColor Red
+}
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
