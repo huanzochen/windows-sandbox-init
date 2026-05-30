@@ -1,4 +1,4 @@
-﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
 # 強制啟用 TLS 1.2，避免 Invoke-WebRequest 下載失敗
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
@@ -47,10 +47,27 @@ $settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs
 
 $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
-# 6. 自動將 Chrome 設為預設瀏覽器 (已廢棄)
-# Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
-# 原本的 DanTup/SetDefaultBrowser 工具已經被原作者刪除，網址會下載到 404 網頁。
-# 加上微軟現在嚴格禁止第三方工具更改預設瀏覽器，建議直接在開啟 Chrome 時手動點擊「設為預設」。
+# 6. 建立常用軟體的桌面捷徑 (替代無法釘選到工作列的限制)
+Write-Host "建立 VSCode, Chrome, Notion 的桌面捷徑..." -ForegroundColor Yellow
+$WshShell = New-Object -comObject WScript.Shell
+
+$AppShortcuts = @(
+    @{ Name = "Google Chrome"; Paths = @("C:\Program Files\Google\Chrome\Application\chrome.exe", "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") },
+    @{ Name = "Visual Studio Code"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") },
+    @{ Name = "Notion"; Paths = @("$env:LOCALAPPDATA\Programs\Notion\Notion.exe", "C:\Program Files\Notion\Notion.exe") }
+)
+
+foreach ($App in $AppShortcuts) {
+    foreach ($Path in $App.Paths) {
+        $ResolvedPath = [System.Environment]::ExpandEnvironmentVariables($Path)
+        if (Test-Path $ResolvedPath) {
+            $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\$($App.Name).lnk")
+            $Shortcut.TargetPath = $ResolvedPath
+            $Shortcut.Save()
+            break
+        }
+    }
+}
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
