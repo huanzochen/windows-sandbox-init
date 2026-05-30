@@ -1,4 +1,4 @@
-﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
 # 1. 安裝 Chocolatey (套件管理工具)
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
@@ -12,6 +12,7 @@ choco install vscode googlechrome git nvm notion gh -y
 
 # 3. Git 設定
 Write-Host "設定 Git..." -ForegroundColor Yellow
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 git config --global user.email "tc"
 git config --global user.name "tc"
 
@@ -47,7 +48,7 @@ Invoke-WebRequest -Uri "https://github.com/DanTup/SetDefaultBrowser/releases/dow
 # 7. 自動下載 AntiGravity
 Write-Host "正在下載 AntiGravity 安裝檔..." -ForegroundColor Yellow
 # 注意：請替換成實際的 .exe 或 .msi 直連下載網址
-$AgUrl = "https://antigravity.google/download/setup.exe" 
+$AgUrl = "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.0.10-5119448496078848/windows-x64/Antigravity-x64.exe"
 $AgInstaller = "$env:TEMP\AntiGravity-setup.exe"
 try {
     Invoke-WebRequest -Uri $AgUrl -OutFile $AgInstaller
