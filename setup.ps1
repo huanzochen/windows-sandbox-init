@@ -46,14 +46,10 @@ $settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.
 
 $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
-# 6. 自動將 Chrome 設為預設瀏覽器
-Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
-curl.exe -L "https://github.com/DanTup/SetDefaultBrowser/releases/download/v1.4/SetDefaultBrowser.exe" -o "$env:TEMP\SetDefaultBrowser.exe" --silent
-if (Test-Path "$env:TEMP\SetDefaultBrowser.exe") {
-    & "$env:TEMP\SetDefaultBrowser.exe" HKLM "Google Chrome"
-} else {
-    Write-Host "SetDefaultBrowser.exe 下載失敗！" -ForegroundColor Red
-}
+# 6. 自動將 Chrome 設為預設瀏覽器 (已廢棄)
+# Write-Host "正在設定 Chrome 為預設瀏覽器..." -ForegroundColor Yellow
+# 原本的 DanTup/SetDefaultBrowser 工具已經被原作者刪除，網址會下載到 404 網頁。
+# 加上微軟現在嚴格禁止第三方工具更改預設瀏覽器，建議直接在開啟 Chrome 時手動點擊「設為預設」。
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
