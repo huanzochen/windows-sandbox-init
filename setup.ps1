@@ -1,5 +1,8 @@
 ﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
+# 強制啟用 TLS 1.2，避免 Invoke-WebRequest 下載失敗
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+
 # 1. 安裝 Chocolatey (套件管理工具)
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Write-Host "正在安裝 Chocolatey..." -ForegroundColor Yellow
@@ -30,13 +33,14 @@ if (-not (Test-Path $vscodeSettingsDir)) {
     New-Item -ItemType Directory -Force -Path $vscodeSettingsDir | Out-Null
 }
 
-$settings = @{}
-if (Test-Path $vscodeSettingsFile) {
-    $settings = Get-Content $vscodeSettingsFile -Raw | ConvertFrom-Json -AsHashtable
+if (Test-Path $vscodeSettingsFile -and (Get-Content $vscodeSettingsFile -Raw).Trim() -ne "") {
+    $settings = Get-Content $vscodeSettingsFile -Raw | ConvertFrom-Json
+} else {
+    $settings = New-Object PSObject
 }
 
-$settings['terminal.integrated.defaultProfile.windows'] = 'Git Bash'
-$settings['security.workspace.trust.enabled'] = $false
+$settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
+$settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.enabled' -Value $false -Force
 
 $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
