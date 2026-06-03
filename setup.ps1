@@ -10,6 +10,13 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
 }
 
 # 2. 安裝所有必備軟體 (-y 代表自動同意，不跳提示)
+# 解決 NVM 遇到預裝 Node.js 會跳出視窗卡住的問題：先將其資料夾移除
+$NodeJSPath = "C:\Program Files\nodejs"
+if (Test-Path $NodeJSPath) {
+    Write-Host "清理預裝的 Node.js 以確保 NVM 靜默安裝..." -ForegroundColor Yellow
+    Remove-Item -Recurse -Force $NodeJSPath -ErrorAction SilentlyContinue
+}
+
 Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity..." -ForegroundColor Yellow
 choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
 
@@ -18,6 +25,11 @@ Write-Host "設定 Git..." -ForegroundColor Yellow
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 git config --global user.email "tc"
 git config --global user.name "tc"
+
+# 3.5 透過 NVM 裝回 Node 18 並設定為預設 (補回剛才刪除的 Node)
+Write-Host "透過 NVM 安裝並啟用 Node 18..." -ForegroundColor Yellow
+nvm install 18
+nvm use 18
 
 # 4. Windows 任務欄設定：永不合併 (Combine taskbar buttons: never)
 Write-Host "設定工作列永不合併..." -ForegroundColor Yellow
