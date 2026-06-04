@@ -17,8 +17,8 @@ if (Test-Path $NodeJSPath) {
     Remove-Item -Recurse -Force $NodeJSPath -ErrorAction SilentlyContinue
 }
 
-Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
+Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity, SetDefaultBrowser..." -ForegroundColor Yellow
+choco install vscode googlechrome git nvm notion gh antigravity setdefaultbrowser -y --ignore-checksums
 
 # 3. Git 設定
 Write-Host "設定 Git..." -ForegroundColor Yellow
@@ -80,6 +80,10 @@ foreach ($App in $AppShortcuts) {
         }
     }
 }
+
+# 7. 設定 Chrome 為預設瀏覽器
+Write-Host "設定 Google Chrome 為預設瀏覽器..." -ForegroundColor Yellow
+SetDefaultBrowser chrome
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
