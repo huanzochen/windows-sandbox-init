@@ -1,4 +1,4 @@
-Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
 # Windows 任務欄設定：永不合併 (Combine taskbar buttons: never)
 Write-Host "設定工作列永不合併..." -ForegroundColor Yellow
