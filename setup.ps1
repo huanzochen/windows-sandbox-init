@@ -1,9 +1,13 @@
-﻿Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
 
 # Windows 任務欄設定：永不合併 (Combine taskbar buttons: never)
 Write-Host "設定工作列永不合併..." -ForegroundColor Yellow
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarGlomLevel" -Value 2
 Stop-Process -Name explorer -Force
+
+# 7. 設定 Chrome 為預設瀏覽器
+Write-Host "設定 Google Chrome 為預設瀏覽器..." -ForegroundColor Yellow
+SetDefaultBrowser chrome
 
 # 強制啟用 TLS 1.2，避免 Invoke-WebRequest 下載失敗
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
@@ -80,10 +84,6 @@ foreach ($App in $AppShortcuts) {
         }
     }
 }
-
-# 7. 設定 Chrome 為預設瀏覽器
-Write-Host "設定 Google Chrome 為預設瀏覽器..." -ForegroundColor Yellow
-SetDefaultBrowser chrome
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
