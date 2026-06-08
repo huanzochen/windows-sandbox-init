@@ -89,7 +89,8 @@ git config --global user.email
 > **⚠️ 注意：** 如果是剛透過 Chocolatey 裝完 Git，必須先**重新開啟終端機**（或執行以下指令重新載入 PATH），否則系統會找不到 `git` 指令：
 >
 > ```powershell
-> $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+> Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+> Update-SessionEnvironment
 > ```
 
 ---
@@ -196,8 +197,9 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 # 安裝所有軟體
 choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
 
-# 重新載入 PATH
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+# 重新載入環境變數
+Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+Update-SessionEnvironment
 
 # Git 設定
 git config --global user.email "tc"

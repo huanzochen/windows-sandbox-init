@@ -29,9 +29,13 @@ if (Test-Path $NodeJSPath) {
 Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity, SetDefaultBrowser..." -ForegroundColor Yellow
 choco install vscode googlechrome git nvm notion gh antigravity setdefaultbrowser -y --ignore-checksums
 
+# 重新載入環境變數 (讓接下來的 git, nvm 等指令能正常執行)
+Write-Host "重新載入環境變數..." -ForegroundColor Yellow
+Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+Update-SessionEnvironment
+
 # 3. Git 設定
 Write-Host "設定 Git..." -ForegroundColor Yellow
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 git config --global user.email "tc"
 git config --global user.name "tc"
 
