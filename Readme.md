@@ -16,7 +16,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [Net.ServicePointManager]::Sec
 
 **全自動完成：**
 - 安裝 Chocolatey 套件管理器
-- 安裝必備軟體：VSCode, Google Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity
+- 安裝必備軟體：VSCode, Google Chrome, Git, NVM, GitHub CLI, AntiGravity
 - 設定 Git 使用者名稱與信箱 (`tc`)
 - 設定 Windows 工作列為「永不合併」並重啟 Explorer
 - 設定 VSCode 預設終端機為 Git Bash
@@ -25,7 +25,6 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [Net.ServicePointManager]::Sec
 
 **腳本完成後需手動操作：**
 - 設定 Chrome 為預設瀏覽器（開啟 Chrome 後點擊「設為預設」）
-- 登入 Notion
 - 登入 GitHub（開啟新終端機輸入 `gh auth login`）
 
 ## 使用方式

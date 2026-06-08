@@ -1,51 +1,51 @@
-Write-Host "開始初始化 Sandbox 環境..." -ForegroundColor Cyan
+Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
 
-# Windows 任務欄設定：永不合併 (Combine taskbar buttons: never)
-Write-Host "設定工作列永不合併..." -ForegroundColor Yellow
+# Windows Taskbar Settings: Combine taskbar buttons: never
+Write-Host "Setting taskbar to never combine..." -ForegroundColor Yellow
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarGlomLevel" -Value 2
 Stop-Process -Name explorer -Force
 
-# 7. 設定 Chrome 為預設瀏覽器
-Write-Host "設定 Google Chrome 為預設瀏覽器..." -ForegroundColor Yellow
+# 7. Set Chrome as the default browser
+Write-Host "Setting Google Chrome as the default browser..." -ForegroundColor Yellow
 SetDefaultBrowser chrome
 
-# 強制啟用 TLS 1.2，避免 Invoke-WebRequest 下載失敗
+# Force enable TLS 1.2 to prevent Invoke-WebRequest download failures
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 
-# 1. 安裝 Chocolatey (套件管理工具)
+# 1. Install Chocolatey (Package Manager)
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-    Write-Host "正在安裝 Chocolatey..." -ForegroundColor Yellow
+    Write-Host "Installing Chocolatey..." -ForegroundColor Yellow
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 }
 
-# 2. 安裝所有必備軟體 (-y 代表自動同意，不跳提示)
-# 解決 NVM 遇到預裝 Node.js 會跳出視窗卡住的問題：先將其資料夾移除
+# 2. Install all necessary software (-y means auto-approve, no prompts)
+# Fix NVM issue where pre-installed Node.js causes a popup to freeze: remove its folder first
 $NodeJSPath = "C:\Program Files\nodejs"
 if (Test-Path $NodeJSPath) {
-    Write-Host "清理預裝的 Node.js 以確保 NVM 靜默安裝..." -ForegroundColor Yellow
+    Write-Host "Cleaning up pre-installed Node.js to ensure silent NVM installation..." -ForegroundColor Yellow
     Remove-Item -Recurse -Force $NodeJSPath -ErrorAction SilentlyContinue
 }
 
-Write-Host "正在安裝/更新 VSCode, Chrome, Git, NVM, Notion, GitHub CLI, AntiGravity, SetDefaultBrowser..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm notion gh antigravity setdefaultbrowser -y --ignore-checksums
+Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, SetDefaultBrowser..." -ForegroundColor Yellow
+choco install vscode googlechrome git nvm gh antigravity setdefaultbrowser -y --ignore-checksums
 
-# 重新載入環境變數 (讓接下來的 git, nvm 等指令能正常執行)
-Write-Host "重新載入環境變數..." -ForegroundColor Yellow
+# Reload environment variables (so subsequent commands like git, nvm can run properly)
+Write-Host "Reloading environment variables..." -ForegroundColor Yellow
 Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
 Update-SessionEnvironment
 
-# 3. Git 設定
-Write-Host "設定 Git..." -ForegroundColor Yellow
+# 3. Git Settings
+Write-Host "Configuring Git..." -ForegroundColor Yellow
 git config --global user.email "tc"
 git config --global user.name "tc"
 
-# 3.5 透過 NVM 裝回 Node 18 並設定為預設 (補回剛才刪除的 Node)
-Write-Host "透過 NVM 安裝並啟用 Node 18..." -ForegroundColor Yellow
+# 3.5 Reinstall Node 18 via NVM and set it as default (restoring the Node we just deleted)
+Write-Host "Installing and enabling Node 18 via NVM..." -ForegroundColor Yellow
 nvm install 18
 nvm use 18
 
-# 5. VSCode 設定 (Git Bash 預設 & 信任工作區)
-Write-Host "設定 VSCode..." -ForegroundColor Yellow
+# 5. VSCode Settings (Git Bash default & Trust Workspace)
+Write-Host "Configuring VSCode..." -ForegroundColor Yellow
 $vscodeSettingsDir = "$env:APPDATA\Code\User"
 $vscodeSettingsFile = "$vscodeSettingsDir\settings.json"
 
@@ -67,14 +67,13 @@ $settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs
 
 $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 
-# 6. 建立常用軟體的桌面捷徑 (替代無法釘選到工作列的限制)
-Write-Host "建立 VSCode, Chrome, Notion 的桌面捷徑..." -ForegroundColor Yellow
+# 6. Create desktop shortcuts for common software (workaround for inability to pin to taskbar)
+Write-Host "Creating desktop shortcuts for VSCode, Chrome..." -ForegroundColor Yellow
 $WshShell = New-Object -comObject WScript.Shell
 
 $AppShortcuts = @(
     @{ Name = "Google Chrome"; Paths = @("C:\Program Files\Google\Chrome\Application\chrome.exe", "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") },
-    @{ Name = "Visual Studio Code"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") },
-    @{ Name = "Notion"; Paths = @("$env:LOCALAPPDATA\Programs\Notion\Notion.exe", "C:\Program Files\Notion\Notion.exe") }
+    @{ Name = "Visual Studio Code"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") }
 )
 
 foreach ($App in $AppShortcuts) {
@@ -90,7 +89,6 @@ foreach ($App in $AppShortcuts) {
 }
 
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "自動化腳本執行完畢！接下來你需要手動完成的幾件事："
-Write-Host "1. 登入 Notion"
-Write-Host "2. 登入 GitHub (打開終端機輸入 gh auth login)"
+Write-Host "Automation script completed! Here are a few things you need to do manually:"
+Write-Host "1. Login to GitHub (open a terminal and run 'gh auth login')"
 Write-Host "======================================" -ForegroundColor Cyan

@@ -48,14 +48,13 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 | Google Chrome | `googlechrome` | https://www.google.com/chrome/ |
 | Git | `git` | https://git-scm.com/downloads/win |
 | NVM (Node 版本管理) | `nvm` | https://github.com/coreybutler/nvm-windows/releases |
-| Notion | `notion` | https://www.notion.com/desktop |
 | GitHub CLI | `gh` | https://cli.github.com/ |
 | AntiGravity | `antigravity` | https://antigravity.google/download |
 
 **用 Chocolatey 一鍵安裝（推薦）：**
 
 ```powershell
-choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
+choco install vscode googlechrome git nvm gh antigravity -y --ignore-checksums
 ```
 
 > **💡 備註：**
@@ -161,11 +160,6 @@ Stop-Process -Name explorer -Force
 
 無論是跑完腳本還是手動設定完，以下幾件事都需要你親自操作：
 
-### ✅ 登入 Notion
-
-- 開啟 Notion 應用程式
-- 輸入你的帳號密碼登入
-
 ### ✅ 登入 GitHub CLI
 
 - 開啟一個**新的**終端機（確保 PATH 已更新）
@@ -195,7 +189,7 @@ gh auth login
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
 # 安裝所有軟體
-choco install vscode googlechrome git nvm notion gh antigravity -y --ignore-checksums
+choco install vscode googlechrome git nvm gh antigravity -y --ignore-checksums
 
 # 重新載入環境變數
 Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
