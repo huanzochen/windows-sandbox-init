@@ -1,4 +1,4 @@
-Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
+﻿Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
 
 # Windows Taskbar Settings: Combine taskbar buttons: never
 Write-Host "Setting taskbar to never combine..." -ForegroundColor Yellow
@@ -86,6 +86,24 @@ foreach ($App in $AppShortcuts) {
             break
         }
     }
+}
+
+# 7. 設定 Chrome 為預設瀏覽器
+Write-Host "設定 Google Chrome 為預設瀏覽器..." -ForegroundColor Yellow
+# 重新整理 PATH，確保剛由 Chocolatey 安裝的 SetDefaultBrowser 可被找到
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# 嘗試從 PATH 取得指令；若 PATH 尚未生效，再退回 Chocolatey 安裝路徑直接搜尋
+$sdb = (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue).Source
+if (-not $sdb) {
+    $sdb = (Get-ChildItem "C:\ProgramData\chocolatey\lib\setdefaultbrowser" -Recurse -Filter "SetDefaultBrowser.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+}
+
+if ($sdb) {
+    # 此 Chocolatey 套件 (kolbi.cz) 正確語法為： SetDefaultBrowser HKLM "<browser name>"
+    & $sdb HKLM "Google Chrome"
+} else {
+    Write-Host "找不到 SetDefaultBrowser，請於安裝完成後手動設定預設瀏覽器。" -ForegroundColor Red
 }
 
 Write-Host "======================================" -ForegroundColor Cyan
