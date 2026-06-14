@@ -92,7 +92,8 @@ foreach ($App in $AppShortcuts) {
 
 # 7. Set Chrome as the default browser
 Write-Host "Setting Google Chrome as the default browser..." -ForegroundColor Yellow
-SetDefaultBrowser chrome
+# 重新整理 PATH，確保剛由 Chocolatey 安裝的 SetDefaultBrowser 可被找到
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
 # 嘗試從 PATH 取得指令；若 PATH 尚未生效，再退回 Chocolatey 安裝路徑直接搜尋
 $sdb = (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue).Source
