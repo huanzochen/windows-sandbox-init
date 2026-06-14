@@ -22,8 +22,8 @@ if (Test-Path $NodeJSPath) {
     Remove-Item -Recurse -Force $NodeJSPath -ErrorAction SilentlyContinue
 }
 
-Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, SetDefaultBrowser..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm gh antigravity setdefaultbrowser -y --ignore-checksums
+Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, SetDefaultBrowser, Claude Desktop..." -ForegroundColor Yellow
+choco install vscode googlechrome git nvm gh antigravity setdefaultbrowser claude -y --ignore-checksums
 
 # Reload environment variables (so subsequent commands like git, nvm can run properly)
 Write-Host "Reloading environment variables..." -ForegroundColor Yellow
@@ -39,6 +39,12 @@ git config --global user.name "tc"
 Write-Host "Installing and enabling Node 18 via NVM..." -ForegroundColor Yellow
 nvm install 18
 nvm use 18
+
+# 3.6 Install Claude Code (requires Node 18+, installed globally via npm)
+Write-Host "Installing Claude Code..." -ForegroundColor Yellow
+# Reload environment so the npm/node from 'nvm use' is on PATH for this session
+Update-SessionEnvironment
+npm install -g @anthropic-ai/claude-code
 
 # 5. VSCode Settings (Git Bash default & Trust Workspace)
 Write-Host "Configuring VSCode..." -ForegroundColor Yellow
