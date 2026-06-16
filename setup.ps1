@@ -14,7 +14,27 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 }
 
-# 2. Install all necessary software (-y means auto-approve, no prompts)
+# 2. Set Chrome as the default browser
+Write-Host "Installing/Updating SetDefaultBrowser first"
+choco setdefaultbrowser -y --ignore-checksums
+Write-Host "Setting Google Chrome as the default browser..." -ForegroundColor Yellow
+# Reload PATH so the SetDefaultBrowser just installed by Chocolatey can be found
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+# Try to get the command from PATH; if PATH isn't refreshed yet, fall back to searching the Chocolatey install path
+$sdb = (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue).Source
+if (-not $sdb) {
+    $sdb = (Get-ChildItem "C:\ProgramData\chocolatey\lib\setdefaultbrowser" -Recurse -Filter "SetDefaultBrowser.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+}
+
+if ($sdb) {
+    # Correct syntax for this Chocolatey package (kolbi.cz): SetDefaultBrowser HKLM "<browser name>"
+    & $sdb HKLM "Google Chrome"
+} else {
+    Write-Host "SetDefaultBrowser not found. Please set the default browser manually after installation." -ForegroundColor Red
+}
+
+# 2.1 Install all necessary software (-y means auto-approve, no prompts)
 # Fix NVM issue where pre-installed Node.js causes a popup to freeze: remove its folder first
 $NodeJSPath = "C:\Program Files\nodejs"
 if (Test-Path $NodeJSPath) {
@@ -22,8 +42,8 @@ if (Test-Path $NodeJSPath) {
     Remove-Item -Recurse -Force $NodeJSPath -ErrorAction SilentlyContinue
 }
 
-Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, SetDefaultBrowser, Claude Desktop..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm gh antigravity setdefaultbrowser claude -y --ignore-checksums
+Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, Claude Desktop..." -ForegroundColor Yellow
+choco install vscode googlechrome git nvm gh antigravity claude -y --ignore-checksums
 
 # Reload environment variables (so subsequent commands like git, nvm can run properly)
 Write-Host "Reloading environment variables..." -ForegroundColor Yellow
@@ -88,24 +108,6 @@ foreach ($App in $AppShortcuts) {
             break
         }
     }
-}
-
-# 7. Set Chrome as the default browser
-Write-Host "Setting Google Chrome as the default browser..." -ForegroundColor Yellow
-# Reload PATH so the SetDefaultBrowser just installed by Chocolatey can be found
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-
-# Try to get the command from PATH; if PATH isn't refreshed yet, fall back to searching the Chocolatey install path
-$sdb = (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue).Source
-if (-not $sdb) {
-    $sdb = (Get-ChildItem "C:\ProgramData\chocolatey\lib\setdefaultbrowser" -Recurse -Filter "SetDefaultBrowser.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-}
-
-if ($sdb) {
-    # Correct syntax for this Chocolatey package (kolbi.cz): SetDefaultBrowser HKLM "<browser name>"
-    & $sdb HKLM "Google Chrome"
-} else {
-    Write-Host "SetDefaultBrowser not found. Please set the default browser manually after installation." -ForegroundColor Red
 }
 
 Write-Host "======================================" -ForegroundColor Cyan
