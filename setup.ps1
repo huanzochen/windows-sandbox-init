@@ -1,4 +1,4 @@
-﻿Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
+Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
 
 # Windows Taskbar Settings: Combine taskbar buttons: never
 Write-Host "Setting taskbar to never combine..." -ForegroundColor Yellow
@@ -16,20 +16,15 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
 
 # 2. Set Chrome as the default browser
 Write-Host "Installing/Updating SetDefaultBrowser first"
-choco setdefaultbrowser -y --ignore-checksums
+choco install setdefaultbrowser -y --ignore-checksums
 Write-Host "Setting Google Chrome as the default browser..." -ForegroundColor Yellow
-# Reload PATH so the SetDefaultBrowser just installed by Chocolatey can be found
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
-# Try to get the command from PATH; if PATH isn't refreshed yet, fall back to searching the Chocolatey install path
-$sdb = (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue).Source
-if (-not $sdb) {
-    $sdb = (Get-ChildItem "C:\ProgramData\chocolatey\lib\setdefaultbrowser" -Recurse -Filter "SetDefaultBrowser.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-}
+# Reload environment so SetDefaultBrowser can be found
+Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1" -ErrorAction SilentlyContinue
+Update-SessionEnvironment
 
-if ($sdb) {
-    # Correct syntax for this Chocolatey package (kolbi.cz): SetDefaultBrowser HKLM "<browser name>"
-    & $sdb HKLM "Google Chrome"
+if (Get-Command SetDefaultBrowser -ErrorAction SilentlyContinue) {
+    SetDefaultBrowser HKLM "Google Chrome"
 } else {
     Write-Host "SetDefaultBrowser not found. Please set the default browser manually after installation." -ForegroundColor Red
 }
@@ -75,19 +70,31 @@ if (-not (Test-Path $vscodeSettingsDir)) {
     New-Item -ItemType Directory -Force -Path $vscodeSettingsDir | Out-Null
 }
 
-$settings = New-Object PSObject
+$settings = $null
 if (Test-Path $vscodeSettingsFile) {
     $content = Get-Content $vscodeSettingsFile -Raw
     if (-not [string]::IsNullOrWhiteSpace($content)) {
-        $settings = ConvertFrom-Json $content
+        try {
+            # Strip out lines starting with // (common VSCode comment style)
+            $cleanContent = $content -replace '(?m)^\s*//.*$', ''
+            $settings = ConvertFrom-Json $cleanContent -ErrorAction Stop
+        } catch {
+            Write-Warning "Cannot parse VSCode settings.json (might contain complex comments). Skipping VSCode config update to prevent overwriting."
+        }
+    } else {
+        $settings = New-Object PSObject
     }
+} else {
+    $settings = New-Object PSObject
 }
 
-$settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
-$settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.enabled' -Value $false -Force
-$settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs' -Value $true -Force
+if ($null -ne $settings) {
+    $settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
+    $settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.enabled' -Value $false -Force
+    $settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs' -Value $true -Force
 
-$settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
+    $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
+}
 
 # 6. Create desktop shortcuts for common software (workaround for inability to pin to taskbar)
 Write-Host "Creating desktop shortcuts for VSCode, Chrome..." -ForegroundColor Yellow
