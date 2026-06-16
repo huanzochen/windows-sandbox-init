@@ -38,7 +38,7 @@ if (Test-Path $NodeJSPath) {
 }
 
 Write-Host "Installing/Updating VSCode, Chrome, Git, NVM, GitHub CLI, AntiGravity, Claude Desktop, PicPick..." -ForegroundColor Yellow
-choco install vscode googlechrome git nvm gh antigravity claude picpick -y --ignore-checksums
+choco install vscode googlechrome git nvm gh antigravity claude picpick.portable -y --ignore-checksums
 
 # Reload environment variables (so subsequent commands like git, nvm can run properly)
 Write-Host "Reloading environment variables..." -ForegroundColor Yellow
