@@ -92,6 +92,7 @@ if ($null -ne $settings) {
     $settings | Add-Member -MemberType NoteProperty -Name 'terminal.integrated.defaultProfile.windows' -Value 'Git Bash' -Force
     $settings | Add-Member -MemberType NoteProperty -Name 'security.workspace.trust.enabled' -Value $false -Force
     $settings | Add-Member -MemberType NoteProperty -Name 'workbench.editor.wrapTabs' -Value $true -Force
+    $settings | Add-Member -MemberType NoteProperty -Name 'workbench.colorTheme' -Value 'Solarized Light' -Force
 
     $settings | ConvertTo-Json -Depth 10 | Set-Content $vscodeSettingsFile
 }
@@ -116,6 +117,39 @@ foreach ($App in $AppShortcuts) {
         }
     }
 }
+
+# 7. Antigravity Settings (Light Theme)
+Write-Host "Configuring Antigravity..." -ForegroundColor Yellow
+$agyConfigDir = "$env:USERPROFILE\.gemini\config"
+$agyConfigFile = "$agyConfigDir\config.json"
+
+if (-not (Test-Path $agyConfigDir)) {
+    New-Item -ItemType Directory -Force -Path $agyConfigDir | Out-Null
+}
+
+$agySettings = $null
+if (Test-Path $agyConfigFile) {
+    $content = Get-Content $agyConfigFile -Raw
+    if (-not [string]::IsNullOrWhiteSpace($content)) {
+        try {
+            $agySettings = ConvertFrom-Json $content -ErrorAction Stop
+        } catch {
+            Write-Warning "Cannot parse Antigravity config.json. Overwriting."
+            $agySettings = New-Object PSObject
+        }
+    } else {
+        $agySettings = New-Object PSObject
+    }
+} else {
+    $agySettings = New-Object PSObject
+}
+
+if (-not $agySettings.psobject.properties.match('userSettings').Count) {
+    $agySettings | Add-Member -MemberType NoteProperty -Name 'userSettings' -Value (New-Object PSObject)
+}
+$agySettings.userSettings | Add-Member -MemberType NoteProperty -Name 'themeMode' -Value 'THEME_MODE_LIGHT' -Force
+
+$agySettings | ConvertTo-Json -Depth 10 | Set-Content $agyConfigFile
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "Automation script completed! Here are a few things you need to do manually:"
