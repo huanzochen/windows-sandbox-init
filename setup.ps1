@@ -1,5 +1,31 @@
 Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
 
+# ==============================================================================
+# CONFIGURATION
+# ==============================================================================
+Write-Host ""
+Write-Host "==============================================================================" -ForegroundColor Cyan
+Write-Host " [API Key 設定]" -ForegroundColor Cyan
+$ExistingKey = [Environment]::GetEnvironmentVariable("GOOGLE_API_KEY", "User")
+if ([string]::IsNullOrWhiteSpace($ExistingKey)) {
+    $GoogleApiKey = Read-Host "請輸入您的 Google API Key (若無請直接按 Enter 跳過)"
+    if (-not [string]::IsNullOrWhiteSpace($GoogleApiKey)) {
+        Write-Host "Setting Google API Key environment variables..." -ForegroundColor Yellow
+        [Environment]::SetEnvironmentVariable("GOOGLE_API_KEY", $GoogleApiKey, "User")
+        [Environment]::SetEnvironmentVariable("GEMINI_API_KEY", $GoogleApiKey, "User")
+        $env:GOOGLE_API_KEY = $GoogleApiKey
+        $env:GEMINI_API_KEY = $GoogleApiKey
+    } else {
+        Write-Warning "您沒有輸入 Google API Key。之後如果需要使用 AI 工具，請記得手動設定環境變數。"
+    }
+} else {
+    Write-Host "系統中已偵測到 GOOGLE_API_KEY，將沿用現有設定。" -ForegroundColor Green
+    $env:GEMINI_API_KEY = $ExistingKey
+}
+Write-Host "==============================================================================" -ForegroundColor Cyan
+Write-Host ""
+# ==============================================================================
+
 # Windows Taskbar Settings: Combine taskbar buttons: never
 Write-Host "Setting taskbar to never combine..." -ForegroundColor Yellow
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarGlomLevel" -Value 2
@@ -150,6 +176,49 @@ if (-not $agySettings.psobject.properties.match('userSettings').Count) {
 $agySettings.userSettings | Add-Member -MemberType NoteProperty -Name 'themeMode' -Value 'THEME_MODE_LIGHT' -Force
 
 $agySettings | ConvertTo-Json -Depth 10 | Set-Content $agyConfigFile
+
+# 8. Install OpenCode CLI and Superpowers Plugin
+Write-Host "Installing OpenCode CLI and Superpowers Plugin..." -ForegroundColor Yellow
+# Ensure npm is available in the current session
+Update-SessionEnvironment
+npm install -g opencode-ai
+
+$opencodeConfigDir = "$env:USERPROFILE\.config\opencode"
+$opencodeConfigFile = "$opencodeConfigDir\opencode.json"
+
+if (-not (Test-Path $opencodeConfigDir)) {
+    New-Item -ItemType Directory -Force -Path $opencodeConfigDir | Out-Null
+}
+
+$ocSettings = $null
+if (Test-Path $opencodeConfigFile) {
+    $content = Get-Content $opencodeConfigFile -Raw
+    if (-not [string]::IsNullOrWhiteSpace($content)) {
+        try {
+            $ocSettings = ConvertFrom-Json $content -ErrorAction Stop
+        } catch {
+            Write-Warning "Cannot parse opencode.json. Overwriting."
+            $ocSettings = New-Object PSObject
+        }
+    } else {
+        $ocSettings = New-Object PSObject
+    }
+} else {
+    $ocSettings = New-Object PSObject
+}
+
+if (-not $ocSettings.psobject.properties.match('plugin').Count) {
+    $ocSettings | Add-Member -MemberType NoteProperty -Name 'plugin' -Value @()
+}
+
+$pluginString = "superpowers@git+https://github.com/obra/superpowers.git"
+$currentPlugins = @($ocSettings.plugin)
+if ($currentPlugins -notcontains $pluginString) {
+    $currentPlugins += $pluginString
+    $ocSettings.plugin = $currentPlugins
+}
+
+$ocSettings | ConvertTo-Json -Depth 10 | Set-Content $opencodeConfigFile
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "Automation script completed! Here are a few things you need to do manually:"
