@@ -1,31 +1,5 @@
 Write-Host "Initializing Sandbox Environment..." -ForegroundColor Cyan
 
-# ==============================================================================
-# CONFIGURATION
-# ==============================================================================
-Write-Host ""
-Write-Host "==============================================================================" -ForegroundColor Cyan
-Write-Host " [API Key 設定]" -ForegroundColor Cyan
-$ExistingKey = [Environment]::GetEnvironmentVariable("GOOGLE_API_KEY", "User")
-if ([string]::IsNullOrWhiteSpace($ExistingKey)) {
-    $GoogleApiKey = Read-Host "請輸入您的 Google API Key (若無請直接按 Enter 跳過)"
-    if (-not [string]::IsNullOrWhiteSpace($GoogleApiKey)) {
-        Write-Host "Setting Google API Key environment variables..." -ForegroundColor Yellow
-        [Environment]::SetEnvironmentVariable("GOOGLE_API_KEY", $GoogleApiKey, "User")
-        [Environment]::SetEnvironmentVariable("GEMINI_API_KEY", $GoogleApiKey, "User")
-        $env:GOOGLE_API_KEY = $GoogleApiKey
-        $env:GEMINI_API_KEY = $GoogleApiKey
-    } else {
-        Write-Warning "您沒有輸入 Google API Key。之後如果需要使用 AI 工具，請記得手動設定環境變數。"
-    }
-} else {
-    Write-Host "系統中已偵測到 GOOGLE_API_KEY，將沿用現有設定。" -ForegroundColor Green
-    $env:GEMINI_API_KEY = $ExistingKey
-}
-Write-Host "==============================================================================" -ForegroundColor Cyan
-Write-Host ""
-# ==============================================================================
-
 # Windows Taskbar Settings: Combine taskbar buttons: never
 Write-Host "Setting taskbar to never combine..." -ForegroundColor Yellow
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarGlomLevel" -Value 2
