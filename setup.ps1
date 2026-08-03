@@ -45,6 +45,16 @@ Write-Host "Reloading environment variables..." -ForegroundColor Yellow
 Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
 Update-SessionEnvironment
 
+# 2.2 Force-install Chrome extensions via enterprise policy (no Google account needed)
+# Chrome reads ExtensionInstallForcelist on startup and auto-installs from the Web Store
+Write-Host "Configuring Chrome to auto-install Immersive Translate extension..." -ForegroundColor Yellow
+$ForcelistKey = "HKLM:\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist"
+if (-not (Test-Path $ForcelistKey)) {
+    New-Item -Path $ForcelistKey -Force | Out-Null
+}
+# Immersive Translate (https://chromewebstore.google.com/detail/bpoadfkcbjbfhfodiogcnhhhpibjhbnh)
+New-ItemProperty -Path $ForcelistKey -Name "1" -Value "bpoadfkcbjbfhfodiogcnhhhpibjhbnh;https://clients2.google.com/service/update2/crx" -PropertyType String -Force | Out-Null
+
 # 3. Git Settings
 Write-Host "Configuring Git..." -ForegroundColor Yellow
 git config --global user.email "tc"
