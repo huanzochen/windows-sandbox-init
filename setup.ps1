@@ -98,23 +98,41 @@ if ($null -ne $settings) {
 }
 
 # 6. Create desktop shortcuts for common software (workaround for inability to pin to taskbar)
-Write-Host "Creating desktop shortcuts for VSCode, Chrome..." -ForegroundColor Yellow
+Write-Host "Creating desktop shortcuts for VSCode, Chrome, Claude..." -ForegroundColor Yellow
 $WshShell = New-Object -comObject WScript.Shell
 
 $AppShortcuts = @(
     @{ Name = "Google Chrome"; Paths = @("C:\Program Files\Google\Chrome\Application\chrome.exe", "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") },
-    @{ Name = "Visual Studio Code"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") }
+    @{ Name = "Visual Studio Code"; Paths = @("$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe", "C:\Program Files\Microsoft VS Code\Code.exe") },
+    @{ Name = "Claude"; Paths = @("$env:LOCALAPPDATA\AnthropicClaude\claude.exe", "$env:LOCALAPPDATA\Programs\Claude\Claude.exe") }
 )
 
 foreach ($App in $AppShortcuts) {
+    $Created = $false
     foreach ($Path in $App.Paths) {
         $ResolvedPath = [System.Environment]::ExpandEnvironmentVariables($Path)
         if (Test-Path $ResolvedPath) {
             $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\$($App.Name).lnk")
             $Shortcut.TargetPath = $ResolvedPath
             $Shortcut.Save()
+            $Created = $true
             break
         }
+    }
+    # Fallback: copy the installer-created Start Menu shortcut (exe path may vary by version)
+    if (-not $Created) {
+        $StartMenuDirs = @("$env:APPDATA\Microsoft\Windows\Start Menu\Programs", "$env:ProgramData\Microsoft\Windows\Start Menu\Programs")
+        foreach ($Dir in $StartMenuDirs) {
+            $Lnk = Get-ChildItem -Path $Dir -Filter "$($App.Name)*.lnk" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($Lnk) {
+                Copy-Item $Lnk.FullName "C:\Users\Public\Desktop\$($App.Name).lnk" -Force
+                $Created = $true
+                break
+            }
+        }
+    }
+    if (-not $Created) {
+        Write-Warning "Could not create desktop shortcut for $($App.Name)."
     }
 }
 
